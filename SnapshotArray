@@ -17,7 +17,7 @@ class SnapshotArray {
 
             TreeMap<Integer, Integer> map = new TreeMap<>();
 
-            map.put(0, 0); // initial value for snap_id 0
+            map.put(0, 0); 
 
             history.add(map);
 
