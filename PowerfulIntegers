@@ -1,0 +1,54 @@
+import java.util.*;
+
+public class Solution {
+
+    String suffix;
+    int limit;
+    Map<String, Long> memo;
+
+    public long numberOfPowerfulInt(long start, long finish, int limit, String s) {
+        this.suffix = s;
+        this.limit = limit;
+        this.memo = new HashMap<>();
+
+        return count(finish) - count(start - 1);
+    }
+
+    private long count(long num) {
+        if (num < Long.parseLong(suffix)) return 0;
+
+        String numStr = String.valueOf(num);
+        memo.clear();
+        return dfs(0, true, false, new StringBuilder(), numStr);
+    }
+
+    private long dfs(int pos, boolean tight, boolean started, StringBuilder current, String numStr) {
+    if (pos == numStr.length()) {
+        if (!started) return 0;
+        String candidate = current.toString();
+        return candidate.endsWith(suffix) ? 1 : 0;
+    }
+
+    String key = pos + "," + tight + "," + started + "," + current.toString();
+    if (memo.containsKey(key)) return memo.get(key);
+
+    long res = 0;
+    int maxDigit = tight ? numStr.charAt(pos) - '0' : 9;
+
+    for (int d = 0; d <= maxDigit; d++) {
+        if (d > limit) continue;  // 🛠️ important fix here
+
+        boolean nextStarted = started || d != 0;
+        boolean nextTight = tight && (d == maxDigit);
+
+        if (nextStarted) current.append(d);
+
+        res += dfs(pos + 1, nextTight, nextStarted, current, numStr);
+
+        if (nextStarted) current.deleteCharAt(current.length() - 1);
+    }
+
+    memo.put(key, res);
+    return res;
+}
+}
