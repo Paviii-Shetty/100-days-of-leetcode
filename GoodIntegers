@@ -1,0 +1,96 @@
+import java.util.*;
+
+public class Solution {
+    int n, k;
+    long result = 0;
+
+    public long countGoodIntegers(int n, int k) {
+        this.n = n;
+        this.k = k;
+        this.result = 0;
+
+        // Starting with frequency array for digits 0 to 9
+        int[] freq = new int[10];
+        backtrack(freq, 0);
+        return result;
+    }
+
+    private void backtrack(int[] freq, int len) {
+        if (len == n) {
+            // Check if the current digit set can form a palindrome
+            if (canFormPalindrome(freq)) {
+                // Generate the palindrome and check divisibility
+                Set<String> palins = generatePalindromes(freq);
+                for (String palin : palins) {
+                    if (palin.charAt(0) != '0' && Long.parseLong(palin) % k == 0) {
+                        result++;
+                        break; // Only count once per valid freq
+                    }
+                }
+            }
+            return;
+        }
+
+        // Try adding digits to the current combination
+        for (int d = 0; d <= 9; d++) {
+            if (len == 0 && d == 0) continue;  // Skip leading zeros
+            freq[d]++;
+            backtrack(freq, len + 1);
+            freq[d]--;
+        }
+    }
+
+    // Check if the digit frequencies can form a palindrome
+    private boolean canFormPalindrome(int[] freq) {
+        int oddCount = 0;
+        for (int count : freq) {
+            if (count % 2 != 0) oddCount++;
+        }
+        // A palindrome can have at most one odd count digit (for the middle in odd-length)
+        return (n % 2 == 0 && oddCount == 0) || (n % 2 == 1 && oddCount == 1);
+    }
+
+    // Generate all valid palindromes from the digit frequencies
+    private Set<String> generatePalindromes(int[] freq) {
+        List<Character> half = new ArrayList<>();
+        char middle = 0;
+
+        for (int i = 0; i <= 9; i++) {
+            for (int j = 0; j < freq[i] / 2; j++) {
+                half.add((char) (i + '0'));
+            }
+            if (freq[i] % 2 == 1) {
+                middle = (char) (i + '0');
+            }
+        }
+
+        Set<String> palindromes = new HashSet<>();
+        boolean[] used = new boolean[half.size()];
+        Collections.sort(half);
+        backtrackGeneratePalindromes(half, new StringBuilder(), used, middle, palindromes);
+        return palindromes;
+    }
+
+    // Backtracking to generate palindromes from half the digits
+    private void backtrackGeneratePalindromes(List<Character> half, StringBuilder path, boolean[] used, char middle, Set<String> palindromes) {
+        if (path.length() == half.size()) {
+            StringBuilder rev = new StringBuilder(path).reverse();
+            String palin = path.toString() + (n % 2 == 1 ? middle : "") + rev.toString();
+            if (palin.charAt(0) != '0') {
+                palindromes.add(palin);
+            }
+            return;
+        }
+
+        for (int i = 0; i < half.size(); i++) {
+            if (used[i]) continue;
+            if (i > 0 && half.get(i) == half.get(i - 1) && !used[i - 1]) continue;
+
+            used[i] = true;
+            path.append(half.get(i));
+            backtrackGeneratePalindromes(half, path, used, middle, palindromes);
+            path.deleteCharAt(path.length() - 1);
+            used[i] = false;
+        }
+    }
+}
