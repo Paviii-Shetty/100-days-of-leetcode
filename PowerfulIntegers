@@ -47,7 +47,6 @@ public class Solution {
 
         if (nextStarted) current.deleteCharAt(current.length() - 1);
     }
-
     memo.put(key, res);
     return res;
 }
