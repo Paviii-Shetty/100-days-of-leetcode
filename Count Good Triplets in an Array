@@ -1,0 +1,62 @@
+class Solution {
+    public long goodTriplets(int[] nums1, int[] nums2) {
+        int n = nums1.length;
+        int[] pos = new int[n];
+        for (int i = 0; i < n; i++) {
+            pos[nums2[i]] = i;
+        }
+
+        int[] mapped = new int[n];
+        for (int i = 0; i < n; i++) {
+            mapped[i] = pos[nums1[i]];
+        }
+
+        FenwickTree leftTree = new FenwickTree(n);
+        FenwickTree rightTree = new FenwickTree(n);
+        for (int i = 0; i < n; i++) {
+            rightTree.update(mapped[i], 1);
+        }
+
+        long count = 0;
+        for (int i = 0; i < n; i++) {
+            int mid = mapped[i];
+            rightTree.update(mid, -1);
+
+            long leftCount = leftTree.query(mid - 1);
+            long rightCount = rightTree.query(n - 1) - rightTree.query(mid);
+
+            count += leftCount * rightCount;
+            leftTree.update(mid, 1);
+        }
+
+        return count;
+    }
+
+    class FenwickTree {
+        int[] tree;
+        int size;
+
+        FenwickTree(int n) {
+            size = n + 1;
+            tree = new int[size];
+        }
+
+        void update(int i, int delta) {
+            i++;
+            while (i < size) {
+                tree[i] += delta;
+                i += i & -i;
+            }
+        }
+
+        int query(int i) {
+            i++;
+            int sum = 0;
+            while (i > 0) {
+                sum += tree[i];
+                i -= i & -i;
+            }
+            return sum;
+        }
+    }
+}
