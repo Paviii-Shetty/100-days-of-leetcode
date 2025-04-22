@@ -1,0 +1,80 @@
+import java.util.*;
+
+public class Solution {
+    private static final int MOD = 1_000_000_007;
+    private static final int MAX = 10000;
+    private long[] factorial;
+    private long[] inverseFactorial;
+
+    public int idealArrays(int n, int maxValue) {
+        precomputeFactorials(n + MAX);
+        long result = 0;
+
+        for (int num = 1; num <= maxValue; num++) {
+            Map<Integer, Integer> primeFactors = getPrimeFactors(num);
+            long ways = 1;
+
+            for (int exponent : primeFactors.values()) {
+                ways = (ways * combination(n + exponent - 1, exponent)) % MOD;
+            }
+
+            result = (result + ways) % MOD;
+        }
+
+        return (int) result;
+    }
+
+    private void precomputeFactorials(int size) {
+        factorial = new long[size + 1];
+        inverseFactorial = new long[size + 1];
+        factorial[0] = inverseFactorial[0] = 1;
+
+        for (int i = 1; i <= size; i++) {
+            factorial[i] = (factorial[i - 1] * i) % MOD;
+        }
+
+        inverseFactorial[size] = modInverse(factorial[size]);
+
+        for (int i = size - 1; i >= 1; i--) {
+            inverseFactorial[i] = (inverseFactorial[i + 1] * (i + 1)) % MOD;
+        }
+    }
+
+    private long combination(int n, int k) {
+        if (k < 0 || k > n) return 0;
+        return (((factorial[n] * inverseFactorial[k]) % MOD) * inverseFactorial[n - k]) % MOD;
+    }
+
+    private long modInverse(long x) {
+        return modPow(x, MOD - 2);
+    }
+
+    private long modPow(long base, int exponent) {
+        long result = 1;
+        base %= MOD;
+
+        while (exponent > 0) {
+            if ((exponent & 1) == 1) {
+                result = (result * base) % MOD;
+            }
+            base = (base * base) % MOD;
+            exponent >>= 1;
+        }
+
+        return result;
+    }
+
+    private Map<Integer, Integer> getPrimeFactors(int num) {
+        Map<Integer, Integer> factors = new HashMap<>();
+        for (int i = 2; i * i <= num; i++) {
+            while (num % i == 0) {
+                factors.put(i, factors.getOrDefault(i, 0) + 1);
+                num /= i;
+            }
+        }
+        if (num > 1) {
+            factors.put(num, 1);
+        }
+        return factors;
+    }
+}
