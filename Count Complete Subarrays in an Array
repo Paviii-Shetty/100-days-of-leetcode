@@ -1,0 +1,25 @@
+import java.util.*;
+
+public class Solution {
+    public int countCompleteSubarrays(int[] nums) {
+        int totalDistinct = (int) Arrays.stream(nums).distinct().count();
+        int n = nums.length;
+        Map<Integer, Integer> freq = new HashMap<>();
+        int left = 0, count = 0;
+
+        for (int right = 0; right < n; right++) {
+            freq.put(nums[right], freq.getOrDefault(nums[right], 0) + 1);
+
+            while (freq.size() == totalDistinct) {
+                count += n - right;
+                freq.put(nums[left], freq.get(nums[left]) - 1);
+                if (freq.get(nums[left]) == 0) {
+                    freq.remove(nums[left]);
+                }
+                left++;
+            }
+        }
+
+        return count;
+    }
+}
