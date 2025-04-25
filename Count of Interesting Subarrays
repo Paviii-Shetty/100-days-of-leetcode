@@ -1,0 +1,24 @@
+import java.util.*;
+
+public class Solution {
+    public long countInterestingSubarrays(List<Integer> nums, int modulo, int k) {
+        Map<Integer, Long> countMap = new HashMap<>();
+        countMap.put(0, 1L);
+        long result = 0;
+        int prefix = 0;
+
+        for (int num : nums) {
+            if (num % modulo == k) {
+                prefix++;
+            }
+
+            int currMod = prefix % modulo;
+            int targetMod = (currMod - k + modulo) % modulo;
+
+            result += countMap.getOrDefault(targetMod, 0L);
+            countMap.put(currMod, countMap.getOrDefault(currMod, 0L) + 1);
+        }
+
+        return result;
+    }
+}
